@@ -51,6 +51,26 @@
     }
   },
   {
+    "type": "location_option",
+    "named": true,
+    "fields": {
+      "url": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "quoted_string",
+            "named": true
+          },
+          {
+            "type": "url",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "method_option",
     "named": true,
     "fields": {
@@ -80,6 +100,10 @@
         },
         {
           "type": "header_option",
+          "named": true
+        },
+        {
+          "type": "location_option",
           "named": true
         },
         {
@@ -136,6 +160,10 @@
         "required": true,
         "types": [
           {
+            "type": "quoted_string",
+            "named": true
+          },
+          {
             "type": "url",
             "named": true
           }
@@ -164,6 +192,10 @@
     "named": false
   },
   {
+    "type": "--location",
+    "named": false
+  },
+  {
     "type": "--request",
     "named": false
   },
@@ -173,6 +205,10 @@
   },
   {
     "type": "-H",
+    "named": false
+  },
+  {
+    "type": "-L",
     "named": false
   },
   {

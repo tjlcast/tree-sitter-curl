@@ -1,60 +1,56 @@
 module.exports = grammar({
-  name: 'curl',
+  name: "curl",
 
-  extras: $ => [
-    /\s+/,
-    $.comment,
-  ],
+  extras: ($) => [/\s+/, $.comment],
 
   rules: {
-    source_file: $ => repeat($.curl_command),
+    source_file: ($) => repeat($.curl_command),
 
-    comment: _ => token(seq('#', /.*/)),
+    comment: (_) => token(seq("#", /.*/)),
 
-    curl_command: $ => seq(
-      'curl',
-      repeat($.option)
-    ),
+    curl_command: ($) => seq("curl", repeat($.option)),
 
-    option: $ => choice(
-      $.method_option,
-      $.url_option,
-      $.header_option,
-      $.data_option,
-      $.other_option
-    ),
+    option: ($) =>
+      choice(
+        $.method_option,
+        $.url_option,
+        $.header_option,
+        $.data_option,
+        $.location_option,
+        $.other_option
+      ),
 
-    method_option: $ => seq(
-      choice('--request', '-X'),
-      field('method', $.word)
-    ),
+    method_option: ($) =>
+      seq(choice("--request", "-X"), field("method", $.word)),
 
-    url_option: $ => seq(
-      choice('--url', '-U'),
-      field('url', $.url)
-    ),
+    url_option: ($) =>
+      seq(
+        choice("--url", "-U"),
+        field("url", choice($.url, $.quoted_string)) // 修改为接受两种形式
+      ),
 
-    header_option: $ => seq(
-      choice('--header', '-H'),
-      field('header', $.quoted_string)
-    ),
+    location_option: ($) =>
+      seq(
+        choice("--location", "-L"),
+        field("url", choice($.url, $.quoted_string)) // 关键修改：接受引号或裸URL
+      ),
 
-    data_option: $ => seq(
-      choice('--data', '-d', '--data-raw', '--data-ascii', '--data-binary'),
-      field('data', choice($.quoted_string, $.unquoted_data))
-    ),
+    header_option: ($) =>
+      seq(choice("--header", "-H"), field("header", $.quoted_string)),
 
-    other_option: $ => seq(
-      /-\w+/,
-      optional($.word)
-    ),
+    data_option: ($) =>
+      seq(
+        choice("--data", "-d", "--data-raw", "--data-ascii", "--data-binary"),
+        field("data", choice($.quoted_string, $.unquoted_data))
+      ),
 
-    word: _ => /[^\s\\]+/,
-    url: _ => /https?:\/\/[^\s\\'"]+/,
+    other_option: ($) => seq(/-\w+/, optional($.word)),
 
-    quoted_string: _ => /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/,
-    
-    // 新增的 unquoted_data 规则，用于捕获没有引号的数据
-    unquoted_data: _ => /[^\s\\][^\n\\]*/,
-  }
+    word: (_) => /[^\s\\]+/,
+    url: (_) => /https?:\/\/[^\s\\'"]+/,
+
+    quoted_string: (_) => /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/,
+
+    unquoted_data: (_) => /[^\s\\][^\n\\]*/,
+  },
 });

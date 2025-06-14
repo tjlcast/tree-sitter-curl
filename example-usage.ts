@@ -30,30 +30,12 @@ const curlCode1 = `curl --request POST \
   "ip": "121.40.102.152"
 }'`;
 
-
 const curlCode2 = `
 curl --location 'https://api.example.com/users?id=123' \
 --header 'Content-Type: application/json' \
 --header 'Authorization: Bearer your_access_token_here' \
 --data-raw ''
-
-`
-
-// Example 1: Parse a simple expression
-function parseSimpleExpression() {
-  const sourceCode = `curl --request POST \
-     -X GET \
-     --url https://example.com/api \
-     --header 'Content-Type: application/json' \
-     -H 'Authotization: Bearer 1234567890' \
-     --data '{"name": "test"}'`;
-  const tree = parser.parse(sourceCode);
-
-  console.log("Source:", sourceCode);
-  console.log("Parse tree:", tree.rootNode.toString());
-
-  return tree;
-}
+`;
 
 // Example 2: Parse and traverse the AST
 function parseAndTraverse(curlCode: string) {
@@ -75,28 +57,21 @@ function parseAndTraverse(curlCode: string) {
   return tree;
 }
 
-// Example 3: Extract numbers from expression
 function extractHeaders(sourceCode: string): string[] {
   const tree = parser.parse(sourceCode);
   const strings: string[] = [];
 
-  // 递归查找节点中的数字
-  function findNumbers(node: Parser.SyntaxNode) {
-    // 如果节点类型为header_value，则将节点文本转换为浮点数并添加到numbers数组中
+  function findHeaders(node: Parser.SyntaxNode) {
     if (node.type === "header_option") {
-      // numbers.push(parseFloat(node.text));
       strings.push(node.children[1].text);
     }
 
-    // 遍历节点的子节点
     for (const child of node.children) {
-      // 递归调用findNumbers函数
-      findNumbers(child);
+      findHeaders(child);
     }
   }
 
-  findNumbers(tree.rootNode);
-  // return numbers;
+  findHeaders(tree.rootNode);
   return strings;
 }
 
@@ -104,72 +79,93 @@ function extractMethod(sourceCode: string): string[] {
   const tree = parser.parse(sourceCode);
   const method_types: string[] = [];
 
-  // 递归查找节点中的数字
   function findMethodType(node: Parser.SyntaxNode) {
-    // 如果节点类型为header_value，则将节点文本转换为浮点数并添加到numbers数组中
     if (node.type === "method_option") {
-      // numbers.push(parseFloat(node.text));
       method_types.push(node.children[1].text);
     }
 
-    // 遍历节点的子节点
     for (const child of node.children) {
-      // 递归调用findNumbers函数
       findMethodType(child);
     }
   }
 
   findMethodType(tree.rootNode);
-  // return numbers;
   return method_types;
 }
 
 function extractUrl(sourceCode: string): string[] {
   const tree = parser.parse(sourceCode);
-  const method_types: string[] = [];
+  const urls: string[] = [];
 
-  // 递归查找节点中的数字
-  function findType(node: Parser.SyntaxNode) {
-    // 如果节点类型为header_value，则将节点文本转换为浮点数并添加到numbers数组中
-    if (node.type === "url_option") {
-      // numbers.push(parseFloat(node.text));
-      method_types.push(node.children[1].text);
+  function findUrl(node: Parser.SyntaxNode) {
+    if (node.type === "url_option" || node.type === "location_option") {
+      urls.push(node.children[1].text);
     }
 
-    // 遍历节点的子节点
     for (const child of node.children) {
-      // 递归调用findNumbers函数
-      findType(child);
+      findUrl(child);
     }
   }
 
-  findType(tree.rootNode);
-  // return numbers;
-  return method_types;
+  findUrl(tree.rootNode);
+  return urls;
 }
 
 function extractData(sourceCode: string): string[] {
   const tree = parser.parse(sourceCode);
-  const method_types: string[] = [];
+  const data: string[] = [];
 
-  // 递归查找节点中的数字
-  function findType(node: Parser.SyntaxNode) {
-    // 如果节点类型为header_value，则将节点文本转换为浮点数并添加到numbers数组中
+  function findData(node: Parser.SyntaxNode) {
     if (node.type === "data_option") {
-      // numbers.push(parseFloat(node.text));
-      method_types.push(node.children[1].text);
+      data.push(node.children[1].text);
     }
 
-    // 遍历节点的子节点
     for (const child of node.children) {
-      // 递归调用findNumbers函数
-      findType(child);
+      findData(child);
     }
   }
 
-  findType(tree.rootNode);
-  // return numbers;
-  return method_types;
+  findData(tree.rootNode);
+  return data;
+}
+
+function analyzeCurlCommand(
+  curlCode: string,
+  index: number
+): {
+  headers: string[];
+  methods: string[];
+  urls: string[];
+  data: string[];
+} {
+  const result = {
+    headers: [] as string[],
+    methods: [] as string[],
+    urls: [] as string[],
+    data: [] as string[],
+  };
+
+  console.log(`\n===== Analyzing curlCode${index} =====`);
+
+  // 1. Print AST structure
+  console.log("\n[AST Structure]");
+  parseAndTraverse(curlCode);
+
+  // 2. Extract and check elements
+  console.log("\n[Extracted Elements]");
+
+  // Extract values
+  result.headers = extractHeaders(curlCode);
+  result.methods = extractMethod(curlCode);
+  result.urls = extractUrl(curlCode);
+  result.data = extractData(curlCode);
+
+  console.log("Headers:", result.headers);
+  console.log("Methods:", result.methods);
+  console.log("URLs:", result.urls);
+  console.log("Data:", result.data);
+
+  return result;
 }
 
 // Example 4: Validate expression syntax
@@ -198,172 +194,63 @@ function validateExpression(sourceCode: string): {
   };
 }
 
-// Example 5: Get operator precedence information
-function analyzeOperators(sourceCode: string) {
-  const tree = parser.parse(sourceCode);
-  const operators: Array<{ operator: string; precedence: number }> = [];
-
-  function findOperators(node: Parser.SyntaxNode) {
-    if (node.type === "binary_expression") {
-      // Find the operator in this binary expression
-      for (const child of node.children) {
-        const text = child.text;
-        if (["+", "-", "*", "/", "%"].includes(text)) {
-          const precedence = ["*", "/", "%"].includes(text) ? 2 : 1;
-          operators.push({ operator: text, precedence });
-          break;
-        }
-      }
-    }
-
-    for (const child of node.children) {
-      findOperators(child);
-    }
-  }
-
-  findOperators(tree.rootNode);
-  return operators;
-}
-
-// Example 6: Pretty print the expression tree
-function prettyPrintTree(sourceCode: string): string {
-  const tree = parser.parse(sourceCode);
-
-  function printNode(node: Parser.SyntaxNode, depth = 0): string {
-    const indent = "  ".repeat(depth);
-    let result = `${indent}(${node.type}`;
-
-    if (node.children.length === 0) {
-      result += ` "${node.text}"`;
-    } else {
-      result += "\n";
-      for (const child of node.children) {
-        result += printNode(child, depth + 1);
-      }
-      result += indent;
-    }
-
-    result += ")\n";
-    return result;
-  }
-
-  return printNode(tree.rootNode);
-}
-
-// Example usage
+// Run analysis for all curl commands
 export function runExamples() {
-  console.log("=== Tree-sitter Calculator Parser Examples ===\n");
+  console.log("=== Curl Command Analysis Examples ===\n");
 
-  // Example 1
-  console.log("1. Simple expression parsing:");
-  parseSimpleExpression();
-  console.log();
+  let res = analyzeCurlCommand(curlCode0, 0);
+  assertEqual(res.headers, [
+    "'Content-Type: application/json'",
+    "'Content-Type: application/json'",
+    "'Authotization: Bearer 1234567890'",
+  ]);
+  assertEqual(res.methods, ["POST", "GET"]);
+  assertEqual(res.urls, ["https://example.com/api"]);
+  assertEqual(res.data, [`'{"name": "test"}'`]);
 
-  // Example 2
-  const code = curlCode2;
-  console.log("2. AST traversal:");
-  parseAndTraverse(code);
-  console.log();
+  res = analyzeCurlCommand(curlCode1, 1);
+  assertEqual(res.headers, ["'Content-Type: application/json'"]);
+  assertEqual(res.methods, ["POST"]);
+  assertEqual(res.urls, ["http://121.40.102.152:9969/v1/chat/completions"]);
+  assertEqual(res.data, [
+    "'{\n" +
+      '  "max_tokens": 0,\n' +
+      '  "messages": [\n' +
+      "        {\n" +
+      '      "content": "hi",\n' +
+      '      "role": "user"\n' +
+      "    }\n" +
+      "  ],\n" +
+      '  "model": "CHAT",\n' +
+      '  "stream": true,\n' +
+      '  "temperature": 0,\n' +
+      '  "ip": "121.40.102.152"\n' +
+      "}'",
+  ]);
 
-  // Example 3
-  const curlCode = curlCode2;
-  console.log("3. Extract numbers:");
-  const numbers = extractHeaders(curlCode);
-  console.log("Numbers found:", numbers);
-  const nodes = extractMethod(curlCode);
-  console.log("method_type: ", nodes);
-  const url = extractUrl(curlCode);
-  console.log("url: ", url);
-  const data_option = extractData(curlCode);
-  console.log("data: ", data_option);
-  console.log();
-
-  // // Example 4
-  // console.log("4. Validate expressions:");
-  // console.log("Valid:", validateExpression("2 + 3"));
-  // console.log("Invalid:", validateExpression("2 + + 3"));
-  // console.log();
-
-  // // Example 5
-  // console.log("5. Analyze operators:");
-  // const ops = analyzeOperators("2 + 3 * 4 - 1");
-  // console.log("Operators:", ops);
-  // console.log();
-
-  // // Example 6
-  // console.log("6. Pretty print tree:");
-  // console.log(prettyPrintTree("(2 + 3) * 4"));
-}
-
-// Simple calculator evaluator using the AST
-export function evaluateExpression(sourceCode: string): number {
-  const tree = parser.parse(sourceCode);
-
-  function evaluate(node: Parser.SyntaxNode): number {
-    switch (node.type) {
-      case "source_file":
-        // Evaluate the first expression
-        return evaluate(node.children[0]);
-
-      case "expression":
-        // Evaluate the child expression
-        return evaluate(node.children[0]);
-
-      case "number":
-        return parseFloat(node.text);
-
-      case "binary_expression":
-        const left = evaluate(node.children[0]);
-        const operator = node.children[1].text;
-        const right = evaluate(node.children[2]);
-
-        switch (operator) {
-          case "+":
-            return left + right;
-          case "-":
-            return left - right;
-          case "*":
-            return left * right;
-          case "/":
-            return left / right;
-          case "%":
-            return left % right;
-          default:
-            throw new Error(`Unknown operator: ${operator}`);
-        }
-
-      case "grouped_expression":
-        // Evaluate the expression inside parentheses
-        return evaluate(node.children[1]);
-
-      default:
-        throw new Error(`Unknown node type: ${node.type}`);
-    }
-  }
-
-  return evaluate(tree.rootNode);
+  res = analyzeCurlCommand(curlCode2, 2);
+  assertEqual(res.headers, [
+    "'Content-Type: application/json'",
+    "'Authorization: Bearer your_access_token_here'",
+  ]);
+  assertEqual(res.methods, []);
+  assertEqual(res.urls, ["'https://api.example.com/users?id=123'"]);
+  assertEqual(res.data, ["''"]);
 }
 
 // Run examples if this file is executed directly
 if (require.main === module) {
   runExamples();
+}
 
-  // Test the evaluator
-  console.log("\n=== Expression Evaluator ===");
-  const expressions = [
-    "2 + 3",
-    "2 + 3 * 4",
-    "(2 + 3) * 4",
-    "10 / 2 + 3",
-    "15 % 4 + 1",
-  ];
-
-  expressions.forEach((expr) => {
-    try {
-      const result = evaluateExpression(expr);
-      console.log(`${expr} = ${result}`);
-    } catch (error) {
-      console.log(`${expr} = ERROR: ${(error as Error).message}`);
-    }
-  });
+function assertEqual(actual: any, expected: any, message?: string) {
+  if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+    throw new Error(
+      message ||
+        `Expected ${JSON.stringify(expected)}, but got ${JSON.stringify(
+          actual
+        )}`
+    );
+  }
+  console.log("✓ Assertion passed");
 }

@@ -61,6 +61,10 @@
         },
         {
           "type": "SYMBOL",
+          "name": "location_option"
+        },
+        {
+          "type": "SYMBOL",
           "name": "other_option"
         }
       ]
@@ -111,8 +115,52 @@
           "type": "FIELD",
           "name": "url",
           "content": {
-            "type": "SYMBOL",
-            "name": "url"
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "url"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "quoted_string"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "location_option": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "--location"
+            },
+            {
+              "type": "STRING",
+              "value": "-L"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "url",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "url"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "quoted_string"
+              }
+            ]
           }
         }
       ]
