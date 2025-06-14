@@ -37,6 +37,23 @@ curl --location 'https://api.example.com/users?id=123' \
 --data-raw ''
 `;
 
+const curlCode3 = `curl --request POST \
+  http://121.40.102.152:9969/v1/chat/completions \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "max_tokens": 0,
+  "messages": [
+        {
+      "content": "hi",
+      "role": "user"
+    }
+  ],
+  "model": "CHAT",
+  "stream": true,
+  "temperature": 0,
+  "ip": "121.40.102.152"
+}'`;
+
 // Example 2: Parse and traverse the AST
 function parseAndTraverse(curlCode: string) {
   const sourceCode = curlCode;
@@ -100,6 +117,11 @@ function extractUrl(sourceCode: string): string[] {
   function findUrl(node: Parser.SyntaxNode) {
     if (node.type === "url_option" || node.type === "location_option") {
       urls.push(node.children[1].text);
+      return urls;
+    }
+    if (node.type === "url") {
+      urls.push(node.text);
+      return urls;
     }
 
     for (const child of node.children) {
@@ -236,6 +258,26 @@ export function runExamples() {
   assertEqual(res.methods, []);
   assertEqual(res.urls, ["'https://api.example.com/users?id=123'"]);
   assertEqual(res.data, ["''"]);
+
+  res = analyzeCurlCommand(curlCode3, 3);
+  assertEqual(res.headers, ["'Content-Type: application/json'"]);
+  assertEqual(res.methods, ["POST"]);
+  assertEqual(res.urls, ["http://121.40.102.152:9969/v1/chat/completions"]);
+  assertEqual(res.data, [
+    "'{\n" +
+      '  "max_tokens": 0,\n' +
+      '  "messages": [\n' +
+      "        {\n" +
+      '      "content": "hi",\n' +
+      '      "role": "user"\n' +
+      "    }\n" +
+      "  ],\n" +
+      '  "model": "CHAT",\n' +
+      '  "stream": true,\n' +
+      '  "temperature": 0,\n' +
+      '  "ip": "121.40.102.152"\n' +
+      "}'",
+  ]);
 }
 
 // Run examples if this file is executed directly

@@ -8,7 +8,8 @@ module.exports = grammar({
 
     comment: (_) => token(seq("#", /.*/)),
 
-    curl_command: ($) => seq("curl", repeat($.option)),
+    // 修改：允许 URL 直接出现在 curl 命令中
+    curl_command: ($) => seq("curl", optional($.url), repeat($.option)),
 
     option: ($) =>
       choice(
@@ -26,13 +27,13 @@ module.exports = grammar({
     url_option: ($) =>
       seq(
         choice("--url", "-U"),
-        field("url", choice($.url, $.quoted_string)) // 修改为接受两种形式
+        field("url", choice($.url, $.quoted_string))
       ),
 
     location_option: ($) =>
       seq(
         choice("--location", "-L"),
-        field("url", choice($.url, $.quoted_string)) // 关键修改：接受引号或裸URL
+        field("url", choice($.url, $.quoted_string))
       ),
 
     header_option: ($) =>

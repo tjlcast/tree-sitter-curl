@@ -9,6 +9,7 @@ parser.setLanguage(Calculator);
 var curlCode0 = "curl --request POST      -X GET      --url https://example.com/api      --header 'Content-Type: application/json'      --header 'Content-Type: application/json'      -H 'Authotization: Bearer 1234567890'      --data '{\"name\": \"test\"}'";
 var curlCode1 = "curl --request POST   --url http://121.40.102.152:9969/v1/chat/completions   --header 'Content-Type: application/json'   --data '{\n  \"max_tokens\": 0,\n  \"messages\": [\n        {\n      \"content\": \"hi\",\n      \"role\": \"user\"\n    }\n  ],\n  \"model\": \"CHAT\",\n  \"stream\": true,\n  \"temperature\": 0,\n  \"ip\": \"121.40.102.152\"\n}'";
 var curlCode2 = "\ncurl --location 'https://api.example.com/users?id=123' --header 'Content-Type: application/json' --header 'Authorization: Bearer your_access_token_here' --data-raw ''\n";
+var curlCode3 = "curl --request POST   http://121.40.102.152:9969/v1/chat/completions   --header 'Content-Type: application/json'   --data '{\n  \"max_tokens\": 0,\n  \"messages\": [\n        {\n      \"content\": \"hi\",\n      \"role\": \"user\"\n    }\n  ],\n  \"model\": \"CHAT\",\n  \"stream\": true,\n  \"temperature\": 0,\n  \"ip\": \"121.40.102.152\"\n}'";
 // Example 2: Parse and traverse the AST
 function parseAndTraverse(curlCode) {
     var sourceCode = curlCode;
@@ -62,6 +63,11 @@ function extractUrl(sourceCode) {
     function findUrl(node) {
         if (node.type === "url_option" || node.type === "location_option") {
             urls.push(node.children[1].text);
+            return urls;
+        }
+        if (node.type === "url") {
+            urls.push(node.text);
+            return urls;
         }
         for (var _i = 0, _a = node.children; _i < _a.length; _i++) {
             var child = _a[_i];
@@ -168,6 +174,25 @@ function runExamples() {
     assertEqual(res.methods, []);
     assertEqual(res.urls, ["'https://api.example.com/users?id=123'"]);
     assertEqual(res.data, ["''"]);
+    res = analyzeCurlCommand(curlCode3, 3);
+    assertEqual(res.headers, ["'Content-Type: application/json'"]);
+    assertEqual(res.methods, ["POST"]);
+    assertEqual(res.urls, ["http://121.40.102.152:9969/v1/chat/completions"]);
+    assertEqual(res.data, [
+        "'{\n" +
+            '  "max_tokens": 0,\n' +
+            '  "messages": [\n' +
+            "        {\n" +
+            '      "content": "hi",\n' +
+            '      "role": "user"\n' +
+            "    }\n" +
+            "  ],\n" +
+            '  "model": "CHAT",\n' +
+            '  "stream": true,\n' +
+            '  "temperature": 0,\n' +
+            '  "ip": "121.40.102.152"\n' +
+            "}'",
+    ]);
 }
 // Run examples if this file is executed directly
 if (require.main === module) {
