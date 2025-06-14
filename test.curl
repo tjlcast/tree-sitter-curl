@@ -1,0 +1,6 @@
+curl --request POST \
+     -X GET \
+     --url https://example.com/api \
+     --header 'Content-Type: application/json' \
+     -H 'Authotization: Bearer 1234567890' \
+     --data '{"name": "test"}'

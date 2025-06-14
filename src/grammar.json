@@ -1,0 +1,246 @@
+{
+  "name": "curl",
+  "rules": {
+    "source_file": {
+      "type": "REPEAT",
+      "content": {
+        "type": "SYMBOL",
+        "name": "curl_command"
+      }
+    },
+    "comment": {
+      "type": "TOKEN",
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "STRING",
+            "value": "#"
+          },
+          {
+            "type": "PATTERN",
+            "value": ".*"
+          }
+        ]
+      }
+    },
+    "curl_command": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "STRING",
+          "value": "curl"
+        },
+        {
+          "type": "REPEAT",
+          "content": {
+            "type": "SYMBOL",
+            "name": "option"
+          }
+        }
+      ]
+    },
+    "option": {
+      "type": "CHOICE",
+      "members": [
+        {
+          "type": "SYMBOL",
+          "name": "method_option"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "url_option"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "header_option"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "data_option"
+        },
+        {
+          "type": "SYMBOL",
+          "name": "other_option"
+        }
+      ]
+    },
+    "method_option": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "--request"
+            },
+            {
+              "type": "STRING",
+              "value": "-X"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "method",
+          "content": {
+            "type": "SYMBOL",
+            "name": "word"
+          }
+        }
+      ]
+    },
+    "url_option": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "--url"
+            },
+            {
+              "type": "STRING",
+              "value": "-U"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "url",
+          "content": {
+            "type": "SYMBOL",
+            "name": "url"
+          }
+        }
+      ]
+    },
+    "header_option": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "--header"
+            },
+            {
+              "type": "STRING",
+              "value": "-H"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "header",
+          "content": {
+            "type": "SYMBOL",
+            "name": "quoted_string"
+          }
+        }
+      ]
+    },
+    "data_option": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "STRING",
+              "value": "--data"
+            },
+            {
+              "type": "STRING",
+              "value": "-d"
+            },
+            {
+              "type": "STRING",
+              "value": "--data-raw"
+            },
+            {
+              "type": "STRING",
+              "value": "--data-ascii"
+            },
+            {
+              "type": "STRING",
+              "value": "--data-binary"
+            }
+          ]
+        },
+        {
+          "type": "FIELD",
+          "name": "data",
+          "content": {
+            "type": "CHOICE",
+            "members": [
+              {
+                "type": "SYMBOL",
+                "name": "quoted_string"
+              },
+              {
+                "type": "SYMBOL",
+                "name": "unquoted_data"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "other_option": {
+      "type": "SEQ",
+      "members": [
+        {
+          "type": "PATTERN",
+          "value": "-\\w+"
+        },
+        {
+          "type": "CHOICE",
+          "members": [
+            {
+              "type": "SYMBOL",
+              "name": "word"
+            },
+            {
+              "type": "BLANK"
+            }
+          ]
+        }
+      ]
+    },
+    "word": {
+      "type": "PATTERN",
+      "value": "[^\\s\\\\]+"
+    },
+    "url": {
+      "type": "PATTERN",
+      "value": "https?:\\/\\/[^\\s\\\\'\"]+"
+    },
+    "quoted_string": {
+      "type": "PATTERN",
+      "value": "'(?:[^'\\\\]|\\\\.)*'|\"(?:[^\"\\\\]|\\\\.)*\""
+    },
+    "unquoted_data": {
+      "type": "PATTERN",
+      "value": "[^\\s\\\\][^\\n\\\\]*"
+    }
+  },
+  "extras": [
+    {
+      "type": "PATTERN",
+      "value": "\\s+"
+    },
+    {
+      "type": "SYMBOL",
+      "name": "comment"
+    }
+  ],
+  "conflicts": [],
+  "precedences": [],
+  "externals": [],
+  "inline": [],
+  "supertypes": []
+}

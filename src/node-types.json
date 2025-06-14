@@ -1,0 +1,214 @@
+[
+  {
+    "type": "curl_command",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "option",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "data_option",
+    "named": true,
+    "fields": {
+      "data": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "quoted_string",
+            "named": true
+          },
+          {
+            "type": "unquoted_data",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "header_option",
+    "named": true,
+    "fields": {
+      "header": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "quoted_string",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "method_option",
+    "named": true,
+    "fields": {
+      "method": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "word",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "option",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": true,
+      "types": [
+        {
+          "type": "data_option",
+          "named": true
+        },
+        {
+          "type": "header_option",
+          "named": true
+        },
+        {
+          "type": "method_option",
+          "named": true
+        },
+        {
+          "type": "other_option",
+          "named": true
+        },
+        {
+          "type": "url_option",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "other_option",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": false,
+      "required": false,
+      "types": [
+        {
+          "type": "word",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "source_file",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "curl_command",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "url_option",
+    "named": true,
+    "fields": {
+      "url": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "url",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
+    "type": "--data",
+    "named": false
+  },
+  {
+    "type": "--data-ascii",
+    "named": false
+  },
+  {
+    "type": "--data-binary",
+    "named": false
+  },
+  {
+    "type": "--data-raw",
+    "named": false
+  },
+  {
+    "type": "--header",
+    "named": false
+  },
+  {
+    "type": "--request",
+    "named": false
+  },
+  {
+    "type": "--url",
+    "named": false
+  },
+  {
+    "type": "-H",
+    "named": false
+  },
+  {
+    "type": "-U",
+    "named": false
+  },
+  {
+    "type": "-X",
+    "named": false
+  },
+  {
+    "type": "-d",
+    "named": false
+  },
+  {
+    "type": "comment",
+    "named": true
+  },
+  {
+    "type": "curl",
+    "named": false
+  },
+  {
+    "type": "quoted_string",
+    "named": true
+  },
+  {
+    "type": "unquoted_data",
+    "named": true
+  },
+  {
+    "type": "url",
+    "named": true
+  },
+  {
+    "type": "word",
+    "named": true
+  }
+]
