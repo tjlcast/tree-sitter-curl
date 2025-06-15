@@ -54,6 +54,32 @@ const curlCode3 = `curl --request POST \
   "ip": "121.40.102.152"
 }'`;
 
+const curlCode4 = `curl --request POST \
+     -X GET \
+     --url https://example.com/api \
+     --header 'Content-Type: application/json' \
+     -H 'Authotization: Bearer 1234567890' \
+     --data '{"name": "test"}'
+
+
+curl --request POST \
+     -X GET \
+     --url https://example.com/api \
+     --header 'Content-Type: application/json' \
+     -H 'Authotization: Bearer 1234567890' \
+     --data '{"name": "test"}'
+
+
+curl --request POST \
+     -X GET \
+     --url https://example.com/api \
+     --header 'Content-Type: application/json' \
+     -H 'Authotization: Bearer 1234567890' \
+     --data '{"name": "test"}'
+
+
+`;
+
 // Example 2: Parse and traverse the AST
 function parseAndTraverse(curlCode: string) {
   const sourceCode = curlCode;
@@ -72,6 +98,120 @@ function parseAndTraverse(curlCode: string) {
   traverse(tree.rootNode);
 
   return tree;
+}
+
+function parseCurl(sourceCode: string): {
+  headers: string[];
+  methods: string[];
+  urls: string[];
+  data: string[];
+}[] {
+  const parsed: {
+    headers: string[];
+    methods: string[];
+    urls: string[];
+    data: string[];
+  }[] = [];
+  const curl_nodes = extractCurl(sourceCode);
+  for (const node of curl_nodes) {
+    const method = extractCurlMethod(node);
+    const headers = extractCurlHeaders(node);
+    const url = extractCurlUrl(node);
+    const data = extractCurlData(node);
+    parsed.push({ headers, methods: method, urls: url, data });
+  }
+  return parsed;
+}
+
+function extractCurl(sourceCode: string): Parser.SyntaxNode[] {
+  const tree = parser.parse(sourceCode);
+  const nodes: Parser.SyntaxNode[] = [];
+
+  function findHeaders(node: Parser.SyntaxNode) {
+    if (node.type === "curl_command") {
+      nodes.push(node);
+    }
+
+    for (const child of node.children) {
+      findHeaders(child);
+    }
+  }
+
+  findHeaders(tree.rootNode);
+  return nodes;
+}
+
+function extractCurlHeaders(node: Parser.SyntaxNode): string[] {
+  const strings: string[] = [];
+
+  function findHeaders(node: Parser.SyntaxNode) {
+    if (node.type === "header_option") {
+      strings.push(node.children[1].text);
+    }
+
+    for (const child of node.children) {
+      findHeaders(child);
+    }
+  }
+
+  findHeaders(node);
+  return strings;
+}
+
+function extractCurlMethod(node: Parser.SyntaxNode): string[] {
+  const method_types: string[] = [];
+
+  function findMethodType(node: Parser.SyntaxNode) {
+    if (node.type === "method_option") {
+      method_types.push(node.children[1].text);
+    }
+
+    for (const child of node.children) {
+      findMethodType(child);
+    }
+  }
+
+  findMethodType(node);
+  return method_types;
+}
+
+function extractCurlUrl(node: Parser.SyntaxNode): string[] {
+  const urls: string[] = [];
+
+  function findUrl(node: Parser.SyntaxNode) {
+    if (node.type === "url_option" || node.type === "location_option") {
+      urls.push(node.children[1].text);
+      return urls;
+    }
+    if (node.type === "url") {
+      urls.push(node.text);
+      return urls;
+    }
+
+    for (const child of node.children) {
+      findUrl(child);
+    }
+  }
+
+  findUrl(node);
+  return urls;
+}
+
+function extractCurlData(node: Parser.SyntaxNode): string[] {
+  const data: string[] = [];
+
+  function findData(node: Parser.SyntaxNode) {
+    if (node.type === "data_option") {
+      data.push(node.children[1].text);
+    }
+
+    for (const child of node.children) {
+      findData(child);
+    }
+  }
+
+  findData(node);
+  return data;
 }
 
 function extractHeaders(sourceCode: string): string[] {
@@ -278,6 +418,36 @@ export function runExamples() {
       '  "ip": "121.40.102.152"\n' +
       "}'",
   ]);
+
+  const parsed_curls = parseCurl(curlCode4);
+  console.log(parsed_curls);
+  assertEqual(parsed_curls.length, 3);
+  let parse_curl = parsed_curls[0];
+  assertEqual(parse_curl.headers, [
+    "'Content-Type: application/json'",
+    "'Authotization: Bearer 1234567890'",
+  ]);
+  assertEqual(parse_curl.methods, ["POST", "GET"]);
+  assertEqual(parse_curl.urls, ["https://example.com/api"]);
+  assertEqual(parse_curl.data, [`'{"name": "test"}'`]);
+
+  parse_curl = parsed_curls[1];
+  assertEqual(parse_curl.headers, [
+    "'Content-Type: application/json'",
+    "'Authotization: Bearer 1234567890'",
+  ]);
+  assertEqual(parse_curl.methods, ["POST", "GET"]);
+  assertEqual(parse_curl.urls, ["https://example.com/api"]);
+  assertEqual(parse_curl.data, [`'{"name": "test"}'`]);
+
+  parse_curl = parsed_curls[2];
+  assertEqual(parse_curl.headers, [
+    "'Content-Type: application/json'",
+    "'Authotization: Bearer 1234567890'",
+  ]);
+  assertEqual(parse_curl.methods, ["POST", "GET"]);
+  assertEqual(parse_curl.urls, ["https://example.com/api"]);
+  assertEqual(parse_curl.data, [`'{"name": "test"}'`]);
 }
 
 // Run examples if this file is executed directly
